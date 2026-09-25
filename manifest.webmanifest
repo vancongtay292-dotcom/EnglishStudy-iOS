@@ -1,0 +1,14 @@
+{
+  "name": "English Study iOS",
+  "short_name": "English Study",
+  "description": "Ứng dụng tự học tiếng Anh local-first cho iPhone",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f8fb",
+  "theme_color": "#f7f8fb",
+  "icons": [
+    {"src":"icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}

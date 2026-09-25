@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f8fb" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="English Study" />
+  <title>English Study</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="appShell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">ENGLISH STUDY</div>
+        <h1 id="screenTitle">Từ vựng</h1>
+      </div>
+      <button id="quickResumeBtn" class="ghost compact hidden">Tiếp tục AI</button>
+    </header>
+
+    <main>
+      <section id="screen-vocab" class="screen active">
+        <div class="card hero-card">
+          <div class="hero-row">
+            <div>
+              <div class="muted">Kho từ vựng</div>
+              <div class="big-number" id="totalWords">0</div>
+            </div>
+            <div class="progress-ring-wrap">
+              <div class="progress-ring" id="aiRing"><span id="aiPercent">0%</span></div>
+            </div>
+          </div>
+          <div class="progress-line"><div id="aiProgressBar"></div></div>
+          <div class="row between small-gap">
+            <span id="aiProgressText" class="muted">AI hoàn thiện: 0 / 0</span>
+            <span id="aiStatusBadge" class="badge neutral">Sẵn sàng</span>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <button class="stat-card" data-filter="unlearned"><b id="statUnlearned">0</b><span>Chưa học</span></button>
+          <button class="stat-card" data-filter="learning"><b id="statLearning">0</b><span>Đang học</span></button>
+          <button class="stat-card" data-filter="good"><b id="statGood">0</b><span>Nhớ khá</span></button>
+          <button class="stat-card" data-filter="mastered"><b id="statMastered">0</b><span>Đã thuộc</span></button>
+        </div>
+
+        <div class="action-stack">
+          <button id="learn10Btn" class="primary xl">HỌC 10 TỪ</button>
+          <div class="two-col">
+            <button id="quizBtn" class="secondary">KIỂM TRA</button>
+            <button id="openImportBtn" class="secondary">+ THÊM / IMPORT</button>
+          </div>
+          <button id="openWordListBtn" class="ghost">DANH SÁCH TỪ</button>
+        </div>
+
+        <div class="card info-card">
+          <b>Cách xử lý trên iPhone</b>
+          <p>File từ vựng do bạn tự nạp. AI chỉ tạo IPA US/UK, nghĩa, từ loại và ví dụ. Audio chỉ được tạo khi chuẩn bị phiên học 10 từ hoặc khi bạn bấm nghe.</p>
+        </div>
+      </section>
+
+      <section id="screen-listening" class="screen">
+        <div class="row between align-center section-head">
+          <div>
+            <h2>Luyện nghe</h2>
+            <p class="muted">Các đoạn hội thoại đã lưu trên máy.</p>
+          </div>
+          <button id="newDialogueBtn" class="primary compact">+ TẠO MỚI</button>
+        </div>
+        <div id="dialogueList" class="stack"></div>
+        <div id="dialogueEmpty" class="empty-state">
+          <div class="empty-icon">🎧</div>
+          <b>Chưa có đoạn nghe</b>
+          <p>Dán hội thoại dạng <code>W: ...</code>, <code>M: ...</code> hoặc <code>Tên: ...</code>.</p>
+        </div>
+      </section>
+
+      <section id="screen-settings" class="screen">
+        <div class="card form-card">
+          <h2>AI Project Pool</h2>
+          <label>Gemini Project Pool • Từ vựng
+            <textarea id="vocabKeys" rows="4" placeholder="Mỗi dòng = 1 API key từ 1 Google Cloud Project khác nhau"></textarea>
+          </label>
+          <label>Gemini Project Pool • Luyện nghe / phát âm
+            <textarea id="speechKeys" rows="4" placeholder="Mỗi dòng = 1 API key từ 1 Google Cloud Project khác nhau"></textarea>
+          </label>
+          <div class="switch-row">
+            <div><b>Groq dự phòng cho text</b><div class="muted">Chỉ dùng khi Gemini text hết quota/lỗi.</div></div>
+            <input id="groqEnabled" type="checkbox" />
+          </div>
+          <label>Groq API key
+            <input id="groqKey" type="password" autocomplete="off" placeholder="gsk_..." />
+          </label>
+        </div>
+
+        <div class="card form-card">
+          <h2>Mô hình & giọng</h2>
+          <label>Gemini text model<input id="textModel" value="gemini-3.1-flash-lite" /></label>
+          <label>Gemini TTS model<input id="ttsModel" value="gemini-3.1-flash-tts-preview" /></label>
+          <label>Groq text model<input id="groqModel" value="openai/gpt-oss-20b" /></label>
+          <div class="two-col">
+            <label>Giọng từ vựng<input id="wordVoice" value="Kore" /></label>
+            <label>Giọng nữ<input id="femaleVoice" value="Aoede" /></label>
+          </div>
+          <label>Giọng nam<input id="maleVoice" value="Charon" /></label>
+          <div class="segmented">
+            <button type="button" class="accent-setting active" data-accent="US">🇺🇸 American</button>
+            <button type="button" class="accent-setting" data-accent="UK">🇬🇧 British</button>
+          </div>
+        </div>
+
+        <div class="card form-card">
+          <h2>Dữ liệu</h2>
+          <div class="two-col">
+            <button id="exportDataBtn" class="secondary">Backup dữ liệu</button>
+            <button id="importDataBtn" class="secondary">Khôi phục</button>
+          </div>
+          <div class="two-col">
+            <button id="exportConfigBtn" class="ghost">Xuất cấu hình AI</button>
+            <button id="importConfigBtn" class="ghost">Nhập cấu hình AI</button>
+          </div>
+          <input id="restoreFileInput" type="file" accept=".json" hidden />
+          <input id="configFileInput" type="file" accept=".json" hidden />
+        </div>
+        <button id="saveSettingsBtn" class="primary xl">LƯU CÀI ĐẶT</button>
+        <p class="security-note">API key được mã hóa cục bộ bằng Web Crypto trước khi lưu. Vì đây là PWA chạy hoàn toàn trên máy và không có server riêng, không nên chia sẻ thiết bị hoặc bản backup cấu hình AI cho người khác.</p>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-screen="vocab"><span>📚</span><b>Từ vựng</b></button>
+      <button class="nav-btn" data-screen="listening"><span>🎧</span><b>Luyện nghe</b></button>
+      <button class="nav-btn" data-screen="settings"><span>⚙️</span><b>Cài đặt</b></button>
+    </nav>
+  </div>
+
+  <dialog id="importDialog" class="modal">
+    <form method="dialog" class="modal-card">
+      <div class="row between align-center"><h2>Thêm / Import từ</h2><button value="cancel" class="icon-btn">✕</button></div>
+      <label>Dán nhiều từ, mỗi từ một dòng
+        <textarea id="pasteWords" rows="8" placeholder="appointment\ncareer\nassignment"></textarea>
+      </label>
+      <div class="divider"><span>hoặc</span></div>
+      <label class="file-picker">Chọn Excel / CSV / TXT
+        <input id="vocabFileInput" type="file" accept=".xlsx,.csv,.txt,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+      </label>
+      <div id="importPreview" class="notice hidden"></div>
+      <button id="importNowBtn" type="button" class="primary xl">IMPORT</button>
+    </form>
+  </dialog>
+
+  <dialog id="learnDialog" class="modal">
+    <div class="modal-card tall">
+      <div class="row between align-center"><h2>Học 10 từ</h2><button id="closeLearnBtn" class="icon-btn">✕</button></div>
+      <div id="accentPicker" class="segmented">
+        <button class="accent-btn active" data-accent="US">🇺🇸 US</button>
+        <button class="accent-btn" data-accent="UK">🇬🇧 UK</button>
+      </div>
+      <div id="audioPrep" class="notice hidden"></div>
+      <div id="learnContent"></div>
+    </div>
+  </dialog>
+
+  <dialog id="quizDialog" class="modal">
+    <div class="modal-card tall">
+      <div class="row between align-center"><h2>Kiểm tra 10 từ</h2><button id="closeQuizBtn" class="icon-btn">✕</button></div>
+      <div id="quizContent"></div>
+    </div>
+  </dialog>
+
+  <dialog id="wordListDialog" class="modal">
+    <div class="modal-card tall">
+      <div class="row between align-center"><h2>Danh sách từ</h2><button id="closeWordListBtn" class="icon-btn">✕</button></div>
+      <input id="wordSearch" class="search" placeholder="Tìm từ..." />
+      <div id="wordList" class="word-list"></div>
+    </div>
+  </dialog>
+
+  <dialog id="dialogueEditor" class="modal">
+    <div class="modal-card tall">
+      <div class="row between align-center"><h2 id="dialogueEditorTitle">Tạo đoạn nghe mới</h2><button id="closeDialogueEditorBtn" class="icon-btn">✕</button></div>
+      <label>Tiêu đề<input id="dialogueTitle" placeholder="Ví dụ: Renting kayaks" /></label>
+      <label>Hội thoại<textarea id="dialogueText" rows="12" placeholder="W: I'd like to rent kayaks.\nM: Certainly. How many days?"></textarea></label>
+      <label>Tốc độ
+        <input id="dialogueRate" type="range" min="0.7" max="1.3" value="1" step="0.1" />
+        <span id="dialogueRateValue">1.0×</span>
+      </label>
+      <div id="dialoguePlayerLines" class="dialogue-lines"></div>
+      <div id="dialoguePrep" class="notice hidden"></div>
+      <div class="two-col">
+        <button id="saveDialogueBtn" class="secondary">LƯU</button>
+        <button id="playDialogueBtn" class="primary">▶ PHÁT</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast"></div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

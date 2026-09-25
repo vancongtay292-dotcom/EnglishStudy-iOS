@@ -1,0 +1,3 @@
+English Study iOS PWA V1.0
+Baseline: Android V1.12
+Build: 2026-09-23
