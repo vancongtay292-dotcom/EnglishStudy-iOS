@@ -1,3 +1,1 @@
-English Study iOS PWA V1.0
-Baseline: Android V1.12
-Build: 2026-09-23
+English Study iOS PWA V1.0.1 - Groq JSON fix + reliable update cache
