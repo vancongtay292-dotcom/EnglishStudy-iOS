@@ -1,1 +1,1 @@
-English Study iOS PWA V1.0.1 - Groq JSON fix + reliable update cache
+English Study iOS PWA V1.0.2 - Quiz parity with Android V1.12
