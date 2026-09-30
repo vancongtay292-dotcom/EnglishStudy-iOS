@@ -1,1 +1,1 @@
-English Study iOS PWA V1.0.2 - Quiz parity with Android V1.12
+English Study iOS PWA V1.1.0 - UK/US + Part of Speech + Word Family; preserves V1.0.2 Quiz parity

@@ -104,10 +104,12 @@
           <label>Gemini TTS model<input id="ttsModel" value="gemini-3.1-flash-tts-preview" /></label>
           <label>Groq text model<input id="groqModel" value="openai/gpt-oss-20b" /></label>
           <div class="two-col">
-            <label>Giọng từ vựng<input id="wordVoice" value="Kore" /></label>
+            <label>Giọng từ vựng UK<input id="wordVoiceUK" value="Kore" /></label>
+            <label>Giọng từ vựng US<input id="wordVoiceUS" value="Kore" /></label>
             <label>Giọng nữ<input id="femaleVoice" value="Aoede" /></label>
           </div>
           <label>Giọng nam<input id="maleVoice" value="Charon" /></label>
+          <div class="muted">Accent dưới đây chỉ áp dụng cho <b>Luyện nghe</b> và Quiz. Từ vựng luôn có cả UK và US.</div>
           <div class="segmented">
             <button type="button" class="accent-setting active" data-accent="US">🇺🇸 American</button>
             <button type="button" class="accent-setting" data-accent="UK">🇬🇧 British</button>
@@ -157,10 +159,6 @@
   <dialog id="learnDialog" class="modal">
     <div class="modal-card tall">
       <div class="row between align-center"><h2>Học 10 từ</h2><button id="closeLearnBtn" class="icon-btn">✕</button></div>
-      <div id="accentPicker" class="segmented">
-        <button class="accent-btn active" data-accent="US">🇺🇸 US</button>
-        <button class="accent-btn" data-accent="UK">🇬🇧 UK</button>
-      </div>
       <div id="audioPrep" class="notice hidden"></div>
       <div id="learnContent"></div>
     </div>

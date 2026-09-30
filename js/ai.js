@@ -49,35 +49,20 @@ function geminiInline(response){
 }
 
 function vocabSchema(){
-  return {
-    type:'object',
-    properties:{
-      items:{
-        type:'array',
-        items:{
-          type:'object',
-          properties:{
-            index:{type:'integer'},
-            ipaUS:{type:'string'},
-            ipaUK:{type:'string'},
-            meaningVi:{type:'string'},
-            partOfSpeech:{type:'string'},
-            exampleEn:{type:'string'},
-            exampleVi:{type:'string'}
-          },
-          required:['index','ipaUS','ipaUK','meaningVi','partOfSpeech','exampleEn','exampleVi'],
-          additionalProperties:false
-        }
-      }
-    },
-    required:['items'],
-    additionalProperties:false
-  };
+  const example={type:'object',properties:{en:{type:'string'},vi:{type:'string'}},required:['en','vi'],additionalProperties:false};
+  const pronunciation={type:'object',properties:{uk:{type:'string'},us:{type:'string'}},required:['uk','us'],additionalProperties:false};
+  const meaning={type:'object',properties:{vi:{type:'string'},example},required:['vi','example'],additionalProperties:false};
+  const pos={type:'object',properties:{type:{type:'string'},meanings:{type:'array',items:meaning}},required:['type','meanings'],additionalProperties:false};
+  const family={type:'object',properties:{type:{type:'string'},word:{type:'string'},meaningVi:{type:'string'},pronunciation,example},required:['type','word','meaningVi','pronunciation','example'],additionalProperties:false};
+  return {type:'object',properties:{items:{type:'array',items:{type:'object',properties:{
+    index:{type:'integer'},ipaUS:{type:'string'},ipaUK:{type:'string'},meaningVi:{type:'string'},partOfSpeech:{type:'string'},exampleEn:{type:'string'},exampleVi:{type:'string'},
+    partsOfSpeech:{type:'array',items:pos},wordFamily:{type:'array',items:family}
+  },required:['index','ipaUS','ipaUK','meaningVi','partOfSpeech','exampleEn','exampleVi','partsOfSpeech','wordFamily'],additionalProperties:false}}},required:['items'],additionalProperties:false};
 }
 
 function vocabPrompt(words){
   const targets=words.map((w,i)=>`${i}. ${w}`).join('\n');
-  return `You create high-quality English vocabulary flashcards for a Vietnamese adult learner.\nProcess every item in this numbered list:\n${targets}\n\nReturn one JSON object containing an items array.\nRules:\n- Return exactly one item for every input index and preserve each index.\n- ipaUS = accurate General American IPA, including / /.\n- ipaUK = accurate modern Standard British IPA, including / /.\n- meaningVi = short natural Vietnamese meaning; max 2 closely related common meanings.\n- partOfSpeech = concise English part of speech.\n- exampleEn = one short natural English sentence using the intended sense.\n- exampleVi = natural Vietnamese translation of exampleEn.\n- Do not add markdown or explanation.`;
+  return `You create high-quality English vocabulary data for a Vietnamese adult learner.\nProcess every item:\n${targets}\n\nReturn one JSON object containing an items array.\nRules:\n- Exactly one item per input index.\n- ipaUS = accurate General American IPA including / /. ipaUK = modern Standard British IPA including / /.\n- Keep legacy fields meaningVi, partOfSpeech, exampleEn, exampleVi concise and useful. meaningVi is the primary/common meaning.\n- partsOfSpeech: include every common useful part of speech the exact input word genuinely has. Each part has its own meanings. Each meaning has Vietnamese meaning and one short natural English example plus Vietnamese translation. Do not invent rare senses just to add categories.\n- wordFamily: include only common, natural members of the same morphological word family, prioritizing noun, verb, adjective and adverb when they genuinely exist. Do not fabricate a form to fill all four categories.\n- Every wordFamily member must contain type, word, Vietnamese meaning, pronunciation.uk, pronunciation.us, and an example {en,vi}. IPA strings include / /.\n- A family member may equal the input word when it represents a useful family relation. Avoid duplicate family entries with the same word and type.\n- Examples must demonstrate the stated part of speech/meaning.\n- No markdown or explanation.`;
 }
 
 async function groqVocabulary(words,prompt,key,model){
@@ -167,17 +152,17 @@ export async function enrichBatch(words){
 function normalizeItems(items,n){
   const out=Array(n).fill(null);
   for(const x of(Array.isArray(items)?items:[])){
-    const i=Number(x.index);
-    if(!Number.isInteger(i)||i<0||i>=n)continue;
-    const item={
-      ipaUS:String(x.ipaUS||'').trim(),
-      ipaUK:String(x.ipaUK||'').trim(),
-      meaningVi:String(x.meaningVi||'').trim(),
-      partOfSpeech:String(x.partOfSpeech||'').trim(),
-      exampleEn:String(x.exampleEn||'').trim(),
-      exampleVi:String(x.exampleVi||'').trim()
-    };
-    if(item.meaningVi&&item.ipaUS&&item.ipaUK&&item.exampleEn)out[i]=item;
+    const i=Number(x.index); if(!Number.isInteger(i)||i<0||i>=n)continue;
+    const cleanExample=e=>({en:String(e?.en||'').trim(),vi:String(e?.vi||'').trim()});
+    const partsOfSpeech=(Array.isArray(x.partsOfSpeech)?x.partsOfSpeech:[]).map(p=>({
+      type:String(p?.type||'').trim(), meanings:(Array.isArray(p?.meanings)?p.meanings:[]).map(m=>({vi:String(m?.vi||'').trim(),example:cleanExample(m?.example)})).filter(m=>m.vi)
+    })).filter(p=>p.type&&p.meanings.length);
+    const wordFamily=(Array.isArray(x.wordFamily)?x.wordFamily:[]).map(f=>({
+      type:String(f?.type||'').trim(),word:String(f?.word||'').trim(),meaningVi:String(f?.meaningVi||'').trim(),
+      pronunciation:{uk:String(f?.pronunciation?.uk||'').trim(),us:String(f?.pronunciation?.us||'').trim()},example:cleanExample(f?.example)
+    })).filter(f=>f.type&&f.word&&f.meaningVi);
+    const item={ipaUS:String(x.ipaUS||'').trim(),ipaUK:String(x.ipaUK||'').trim(),meaningVi:String(x.meaningVi||'').trim(),partOfSpeech:String(x.partOfSpeech||'').trim(),exampleEn:String(x.exampleEn||'').trim(),exampleVi:String(x.exampleVi||'').trim(),partsOfSpeech,wordFamily};
+    if(item.meaningVi&&item.ipaUS&&item.ipaUK&&item.exampleEn&&partsOfSpeech.length)out[i]=item;
   }
   return out;
 }
