@@ -60,10 +60,16 @@
 
         <div class="card info-card">
           <b>Cách xử lý trên iPhone</b>
-          <p>File từ vựng do bạn tự nạp. AI chỉ tạo IPA US/UK, nghĩa, từ loại và ví dụ. Audio chỉ được tạo khi chuẩn bị phiên học 10 từ hoặc khi bạn bấm nghe.</p>
+          <p>File từ vựng do bạn tự nạp. AI tạo IPA UK/US, nghĩa, từ loại, ví dụ, Word Family và từ đồng nghĩa theo từng nghĩa. Audio AI được cache để dùng lại khi học.</p>
         </div>
       </section>
 
+
+      <section id="screen-phrasal" class="screen">
+        <div class="card hero-card"><div class="hero-row"><div><div class="muted">Kho cụm động từ</div><div class="big-number" id="phrasalCount">0</div></div></div><div id="phrasalProgress" class="muted">AI hoàn thiện: 0 / 0</div></div>
+        <div class="action-stack"><button id="addPhrasalBtn" class="primary xl">+ THÊM CỤM ĐỘNG TỪ</button><input id="phrasalSearch" class="search" placeholder="Tìm cụm động từ..." /></div>
+        <div id="phrasalList" class="word-list"></div>
+      </section>
       <section id="screen-listening" class="screen">
         <div class="row between align-center section-head">
           <div>
@@ -136,6 +142,7 @@
 
     <nav class="bottom-nav">
       <button class="nav-btn active" data-screen="vocab"><span>📚</span><b>Từ vựng</b></button>
+      <button class="nav-btn" data-screen="phrasal"><span>🔗</span><b>Cụm động từ</b></button>
       <button class="nav-btn" data-screen="listening"><span>🎧</span><b>Luyện nghe</b></button>
       <button class="nav-btn" data-screen="settings"><span>⚙️</span><b>Cài đặt</b></button>
     </nav>
@@ -197,6 +204,9 @@
     </div>
   </dialog>
 
+
+  <dialog id="phrasalImportDialog" class="modal"><div class="modal-card"><div class="row between align-center"><h2>Thêm cụm động từ</h2><button onclick="this.closest('dialog').close()" class="icon-btn">✕</button></div><label>Mỗi cụm một dòng<textarea id="pastePhrasal" rows="8" placeholder="look after\ngive up\ntake off"></textarea></label><div id="phrasalImportResult" class="notice hidden"></div><button id="phrasalImportNow" class="primary xl">THÊM & AI HOÀN THIỆN</button></div></dialog>
+  <dialog id="phrasalDetailDialog" class="modal"><div class="modal-card tall"><div class="row between align-center"><h2>Cụm động từ</h2><button id="closePhrasalDetail" class="icon-btn">✕</button></div><div id="phrasalDetailContent"></div></div></dialog>
   <div id="toast" class="toast"></div>
   <script type="module" src="js/app.js"></script>
 </body>
