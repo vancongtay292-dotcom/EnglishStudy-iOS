@@ -67,8 +67,15 @@
 
       <section id="screen-phrasal" class="screen">
         <div class="card hero-card"><div class="hero-row"><div><div class="muted">Kho cụm động từ</div><div class="big-number" id="phrasalCount">0</div></div></div><div id="phrasalProgress" class="muted">AI hoàn thiện: 0 / 0</div></div>
-        <div class="action-stack"><button id="addPhrasalBtn" class="primary xl">+ THÊM CỤM ĐỘNG TỪ</button><input id="phrasalSearch" class="search" placeholder="Tìm cụm động từ..." /></div>
-        <div id="phrasalList" class="word-list"></div>
+        <div class="action-stack">
+          <button id="learn10PhrasalBtn" class="primary xl">HỌC 10 CỤM ĐÃ SẴN SÀNG</button>
+          <div class="two-col">
+            <button id="quizPhrasalBtn" class="secondary">KIỂM TRA MỨC ĐỘ THUỘC</button>
+            <button id="addPhrasalBtn" class="secondary">+ THÊM / IMPORT</button>
+          </div>
+          <button id="togglePhrasalListBtn" class="ghost">DANH SÁCH CỤM</button>
+          <div id="phrasalListPanel" class="hidden"><input id="phrasalSearch" class="search" placeholder="Tìm cụm động từ..." /><div id="phrasalList" class="word-list"></div></div>
+        </div>
       </section>
       <section id="screen-listening" class="screen">
         <div class="row between align-center section-head">
@@ -207,6 +214,8 @@
 
   <dialog id="phrasalImportDialog" class="modal"><div class="modal-card"><div class="row between align-center"><h2>Thêm cụm động từ</h2><button onclick="this.closest('dialog').close()" class="icon-btn">✕</button></div><label>Mỗi cụm một dòng<textarea id="pastePhrasal" rows="8" placeholder="look after\ngive up\ntake off"></textarea></label><div id="phrasalImportResult" class="notice hidden"></div><button id="phrasalImportNow" class="primary xl">THÊM & AI HOÀN THIỆN</button></div></dialog>
   <dialog id="phrasalDetailDialog" class="modal"><div class="modal-card tall"><div class="row between align-center"><h2>Cụm động từ</h2><button id="closePhrasalDetail" class="icon-btn">✕</button></div><div id="phrasalDetailContent"></div></div></dialog>
+  <dialog id="phrasalLearnDialog" class="modal"><div class="modal-card tall"><div class="row between align-center"><h2>Học 10 cụm</h2><button id="closePhrasalLearn" class="icon-btn">✕</button></div><div id="phrasalLearnContent"></div></div></dialog>
+  <dialog id="phrasalQuizDialog" class="modal"><div class="modal-card tall"><div class="row between align-center"><h2>Kiểm tra cụm động từ</h2><button id="closePhrasalQuiz" class="icon-btn">✕</button></div><div id="phrasalQuizContent"></div></div></dialog>
   <div id="toast" class="toast"></div>
   <script type="module" src="js/app.js"></script>
 </body>
