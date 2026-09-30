@@ -1,1 +1,1 @@
-English Study iOS PWA V1.1.4 - Synonyms + Phrasal Verbs + UK/US Audio; preserves existing vocabulary, progress and audio cache
+English Study iOS PWA V1.1.5 - Editable Meanings + Synonyms + Phrasal Verbs + Phrasal Learning UI; preserves existing IndexedDB data and audio cache

@@ -178,6 +178,14 @@
     </div>
   </dialog>
 
+  <dialog id="editMeaningDialog" class="modal">
+    <div class="modal-card">
+      <div class="row between align-center"><h2>Điều chỉnh nghĩa từ vựng</h2><button id="closeEditMeaningBtn" class="icon-btn">✕</button></div>
+      <div id="editMeaningContent"></div>
+      <button id="saveEditMeaningBtn" class="primary xl">LƯU NGHĨA</button>
+    </div>
+  </dialog>
+
   <dialog id="quizDialog" class="modal">
     <div class="modal-card tall">
       <div class="row between align-center"><h2 id="quizDialogTitle">Kiểm tra từ vựng</h2><button id="closeQuizBtn" class="icon-btn">✕</button></div>
@@ -213,6 +221,7 @@
 
 
   <dialog id="phrasalImportDialog" class="modal"><div class="modal-card"><div class="row between align-center"><h2>Thêm cụm động từ</h2><button onclick="this.closest('dialog').close()" class="icon-btn">✕</button></div><label>Mỗi cụm một dòng<textarea id="pastePhrasal" rows="8" placeholder="look after\ngive up\ntake off"></textarea></label><div id="phrasalImportResult" class="notice hidden"></div><button id="phrasalImportNow" class="primary xl">THÊM & AI HOÀN THIỆN</button></div></dialog>
+  <dialog id="phrasalMeaningDialog" class="modal"><div class="modal-card"><div class="row between align-center"><h2>Điều chỉnh nghĩa cụm động từ</h2><button id="closePhrasalMeaning" class="icon-btn">✕</button></div><div id="phrasalMeaningContent"></div><button id="savePhrasalMeaning" class="primary xl">LƯU NGHĨA</button></div></dialog>
   <dialog id="phrasalDetailDialog" class="modal"><div class="modal-card tall"><div class="row between align-center"><h2>Cụm động từ</h2><button id="closePhrasalDetail" class="icon-btn">✕</button></div><div id="phrasalDetailContent"></div></div></dialog>
   <dialog id="phrasalLearnDialog" class="modal"><div class="modal-card tall"><div class="row between align-center"><h2>Học 10 cụm</h2><button id="closePhrasalLearn" class="icon-btn">✕</button></div><div id="phrasalLearnContent"></div></div></dialog>
   <dialog id="phrasalQuizDialog" class="modal"><div class="modal-card tall"><div class="row between align-center"><h2>Kiểm tra cụm động từ</h2><button id="closePhrasalQuiz" class="icon-btn">✕</button></div><div id="phrasalQuizContent"></div></div></dialog>

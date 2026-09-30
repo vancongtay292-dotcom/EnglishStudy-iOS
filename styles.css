@@ -11,3 +11,6 @@
 .bottom-nav{overflow-x:auto}.bottom-nav .nav-btn{min-width:82px}
 
 .bottom-nav{overflow-x:hidden}.bottom-nav .nav-btn{min-width:0}.nav-btn b{white-space:nowrap;font-size:10.5px}
+
+/* V1.1.5 - user editable meanings */
+.edit-meaning-btn{width:100%;margin-top:18px}.edit-meaning-section{display:grid;gap:10px;margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:14px}.edit-meaning-section label,#phrasalMeaningContent label{display:grid;gap:7px;margin:12px 0}.edit-meaning-section textarea,#phrasalMeaningContent textarea{width:100%;border:1px solid #d8dde7;border-radius:13px;padding:12px;background:#fff}

@@ -1,4 +1,4 @@
-const CACHE = 'english-study-ios-v1.1.4-phrasal-learning';
+const CACHE = 'english-study-ios-v1.1.5-editable-meanings';
 const CORE = [
   './','./index.html','./styles.css','./manifest.webmanifest','./VERSION.txt',
   './js/app.js','./js/db.js','./js/crypto.js','./js/importer.js','./js/ai.js','./js/audio.js','./js/utils.js',
