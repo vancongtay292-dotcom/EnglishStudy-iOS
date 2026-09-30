@@ -7,6 +7,7 @@ import {normalizeWord,shuffle,clamp,DAY,downloadBlob,fileStamp,toast,escapeHtml}
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 let enrichmentRunning=false, stopEnrichment=false, learnWords=[],learnIndex=0,learnDetailMode=false,quizQuestions=[],quizIndex=0,quizCorrectCount=0,quizResults=[],quizCount=10,quizPool='WEAK',quizAnswered=false,currentDialogue=null,dialoguePlaying=false;
+const audioGenerationInFlight=new Map();
 
 await openDb();
 await loadSettingsToUi();
@@ -54,8 +55,48 @@ function familyHtml(v){const fam=Array.isArray(v.wordFamily)?v.wordFamily:[];if(
 function renderLearn(){const v=learnWords[learnIndex];if(!v){$('#learnContent').innerHTML='<div class="empty-state"><b>Hoàn thành phiên học.</b></div>';refreshDashboard();return}$('#learnContent').innerHTML=`<div class="learn-card">${learnDetailMode?'':`<div class="muted">${learnIndex+1} / ${learnWords.length}</div>`}<div class="learn-word">${escapeHtml(v.word)}</div><div class="ipa-row"><button id="playWordUK" class="audio-btn">🇬🇧 ${escapeHtml(v.ipaUK||'—')} 🔊</button><button id="playWordUS" class="audio-btn">🇺🇸 ${escapeHtml(v.ipaUS||'—')} 🔊</button></div>${posHtml(v)}${familyHtml(v)}${learnDetailMode?'<div class="detail-note muted">Chế độ xem chi tiết — không thay đổi tiến độ học.</div>':'<div class="learn-nav"><button id="dontKnowBtn" class="secondary">CHƯA NHỚ</button><button id="knowBtn" class="primary">ĐÃ NHỚ</button></div>'}</div>`;$('#playWordUK').onclick=()=>playTextCached(v.word,'UK',`vocab:${v.id}:UK`,v.id);$('#playWordUS').onclick=()=>playTextCached(v.word,'US',`vocab:${v.id}:US`,v.id);$$('.example-audio').forEach((b,i)=>b.onclick=()=>playTextCached(b.dataset.text,'US',`example:${v.id}:${i}:US`,v.id,true));$$('.family-word-audio').forEach(b=>b.onclick=()=>{const f=v.wordFamily[Number(b.dataset.index)];playTextCached(f.word,b.dataset.accent,`family:${v.id}:${normalizeWord(f.word)}:${b.dataset.accent}`,v.id)});$$('.family-example-audio').forEach(b=>{const i=Number(b.dataset.index),f=v.wordFamily[i];b.onclick=()=>playTextCached(f.example.en,'US',`family-example:${v.id}:${i}:US`,v.id,true)});if(!learnDetailMode){$('#dontKnowBtn').onclick=()=>gradeLearn(false);$('#knowBtn').onclick=()=>gradeLearn(true)}}
 async function gradeLearn(correct){const v=learnWords[learnIndex];v.isLearned=true;v.reviewCount=(v.reviewCount||0)+1;v.lastReviewedAt=Date.now();if(correct){v.correctCount=(v.correctCount||0)+1;v.correctStreak=(v.correctStreak||0)+1;v.masteryScore=clamp((v.masteryScore||0)+12,0,100)}else{v.wrongCount=(v.wrongCount||0)+1;v.correctStreak=0;v.masteryScore=clamp((v.masteryScore||0)-8,0,100)}v.nextReviewAt=Date.now()+reviewInterval(v.masteryScore);await updateVocab(v);learnIndex++;renderLearn()}
 function reviewInterval(score){return(score>=90?30:score>=80?14:score>=60?7:score>=30?3:1)*DAY}
-async function prepareLearnAudio(){if(!learnWords.length)return;$('#audioPrep').classList.remove('hidden');let done=0,created=0;const jobs=[];for(const v of learnWords)for(const accent of ['UK','US'])jobs.push(async()=>{const key=`vocab:${v.id}:${accent}`;if(!(await getAudio(key))){try{const voice=await loadSetting(accent==='UK'?'wordVoiceUK':'wordVoiceUS',await loadSetting('wordVoice','Kore'));const blob=await generateSpeech(v.word,accent,voice,'vocabulary');await putAudio(key,blob,{wordId:v.id,accent});created++}catch{}}done++;$('#audioPrep').textContent=`Chuẩn bị phát âm UK/US ${done}/${learnWords.length*2} • tạo mới ${created}`});await runPool(jobs,2);$('#audioPrep').textContent='Sẵn sàng phát âm UK và US. Word Family/ví dụ sẽ tạo và cache khi bấm nghe.'}
-async function playTextCached(text,accent,key,wordId,isSentence=false){let a=await getAudio(key);if(a?.blob){await playBlob(a.blob);return}try{const voice=await loadSetting(accent==='UK'?'wordVoiceUK':'wordVoiceUS',await loadSetting('wordVoice','Kore'));const blob=await generateSpeech(text,accent,voice,isSentence?'dialogue':'vocabulary');await putAudio(key,blob,{wordId,accent,text});await playBlob(blob)}catch{await speakSystem(text,accent,isSentence?1:0.9)}}
+function learnAudioJobsForWord(v){
+  const jobs=[];
+  for(const accent of ['UK','US'])jobs.push({text:v.word,accent,key:`vocab:${v.id}:${accent}`,wordId:v.id,isSentence:false});
+  let exampleIndex=0;
+  const parts=Array.isArray(v.partsOfSpeech)&&v.partsOfSpeech.length?v.partsOfSpeech:[{meanings:[{example:{en:v.exampleEn||''}}]}];
+  for(const p of parts)for(const m of (p.meanings||[])){
+    const text=String(m?.example?.en||'').trim();
+    if(text)jobs.push({text,accent:'US',key:`example:${v.id}:${exampleIndex}:US`,wordId:v.id,isSentence:true});
+    exampleIndex++;
+  }
+  const fam=Array.isArray(v.wordFamily)?v.wordFamily:[];
+  fam.forEach((f,i)=>{
+    const fw=String(f?.word||'').trim();
+    if(fw)for(const accent of ['UK','US'])jobs.push({text:fw,accent,key:`family:${v.id}:${normalizeWord(fw)}:${accent}`,wordId:v.id,isSentence:false});
+    const ex=String(f?.example?.en||'').trim();
+    if(ex)jobs.push({text:ex,accent:'US',key:`family-example:${v.id}:${i}:US`,wordId:v.id,isSentence:true});
+  });
+  return jobs;
+}
+async function ensureAudioCached({text,accent,key,wordId,isSentence=false}){
+  const cached=await getAudio(key);if(cached?.blob)return cached.blob;
+  if(audioGenerationInFlight.has(key))return audioGenerationInFlight.get(key);
+  const task=(async()=>{const voice=await loadSetting(accent==='UK'?'wordVoiceUK':'wordVoiceUS',await loadSetting('wordVoice','Kore'));const blob=await generateSpeech(text,accent,voice,isSentence?'dialogue':'vocabulary');await putAudio(key,blob,{wordId,accent,text});return blob})().finally(()=>audioGenerationInFlight.delete(key));
+  audioGenerationInFlight.set(key,task);return task;
+}
+async function prepareLearnAudio(){
+  if(!learnWords.length)return;
+  $('#audioPrep').classList.remove('hidden');
+  const priorityWords=[...learnWords.slice(0,2),...learnWords.slice(2)];
+  const jobs=[];
+  // Ưu tiên từ chính UK/US của từ đang xem và từ kế tiếp trước.
+  for(const v of priorityWords.slice(0,2))for(const j of learnAudioJobsForWord(v).filter(x=>x.key.startsWith('vocab:')))jobs.push(j);
+  // Sau đó chuẩn bị toàn bộ ví dụ + Word Family của 2 từ đầu.
+  for(const v of priorityWords.slice(0,2))for(const j of learnAudioJobsForWord(v).filter(x=>!x.key.startsWith('vocab:')))jobs.push(j);
+  // Cuối cùng prefetch đầy đủ các từ còn lại trong phiên.
+  for(const v of priorityWords.slice(2))jobs.push(...learnAudioJobsForWord(v));
+  let done=0,created=0,failed=0;
+  $('#audioPrep').textContent=`Đang chuẩn bị audio AI cho phiên học 0/${jobs.length}… Bạn có thể học ngay.`;
+  await runPool(jobs.map(j=>async()=>{const existed=!!(await getAudio(j.key))?.blob;if(!existed){try{await ensureAudioCached(j);created++}catch{failed++}}done++;$('#audioPrep').textContent=`Đang chuẩn bị audio AI ${done}/${jobs.length} • mới ${created}${failed?` • lỗi ${failed}`:''} — vẫn có thể học ngay.`}),2);
+  $('#audioPrep').textContent=failed?`Prefetch hoàn tất: ${created} audio mới, ${failed} audio chưa tạo được. Khi bấm nghe app sẽ thử lại.`:`Audio AI của phiên học đã sẵn sàng (${jobs.length} mục, tạo mới ${created}).`;
+}
+async function playTextCached(text,accent,key,wordId,isSentence=false){let a=await getAudio(key);if(a?.blob){await playBlob(a.blob);return}try{const blob=await ensureAudioCached({text,accent,key,wordId,isSentence});await playBlob(blob)}catch{await speakSystem(text,accent,isSentence?1:0.9)}}
 async function playWord(v,accent){return playTextCached(v.word,accent,`vocab:${v.id}:${accent}`,v.id)}
 
 async function runPool(jobs,n){let i=0;async function w(){while(i<jobs.length){const j=i++;await jobs[j]()}}await Promise.all(Array.from({length:Math.min(n,jobs.length)},w))}

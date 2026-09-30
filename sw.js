@@ -1,4 +1,4 @@
-const CACHE = 'english-study-ios-v1.1.1-word-family';
+const CACHE = 'english-study-ios-v1.1.2-audio-prefetch';
 const CORE = [
   './','./index.html','./styles.css','./manifest.webmanifest','./VERSION.txt',
   './js/app.js','./js/db.js','./js/crypto.js','./js/importer.js','./js/ai.js','./js/audio.js','./js/utils.js',
